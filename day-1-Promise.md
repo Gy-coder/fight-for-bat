@@ -267,7 +267,87 @@
      ```
 
 1. 并发请求限制数量手写代码
+
+   ```js
+   async function asyncPool(limit, array, fn) {
+     const ret = [];
+     const exec = [];
+     for (let item of array) {
+       const p = fn(item);
+       ret.push(p);
+       if (limit <= array.length) {
+         const e = p.then((resolve) => {
+           console.log(`正在执行。 exec长度: ${exec.length}`);
+           exec.splice(exec.indexOf(e), 1);
+         });
+         exec.push(e);
+         if (exec.length >= limit) {
+           await Promise.race(exec);
+         }
+       }
+     }
+     return Promise.all(ret);
+   }
+
+   const request = (i) => {
+     console.log(`开始${i}`);
+     return new Promise((resolve, reject) => {
+       setTimeout(() => {
+         resolve(i);
+         console.log(`结束${i}`);
+       }, 1000 + Math.random() * 1000);
+     });
+   };
+
+   const urls = new Array(30).fill(0).map((v, i) => i);
+
+   console.log(urls);
+
+   (async () => {
+     const res = await asyncPool(3, urls, request);
+     console.log(res);
+   })();
+   ```
+
 1. 手写代码实现 Promisify
+
+   ```js
+   function promisify(fn) {
+     return function (...args) {
+       return new Promise((resolve, reject) => {
+         fn(...args, (err, data) => {
+           if (err) {
+             reject(err);
+             return;
+           }
+           resolve(data);
+         });
+       });
+     };
+   }
+
+   function doSomething(thing, callback) {
+     setTimeout(() => {
+       if (thing === "hhh") {
+         callback(undefined, thing);
+       } else {
+         callback("error!!", undefined);
+       }
+     }, 1000);
+   }
+
+   const myPromisifyDoSomethine = promisify(doSomething);
+   myPromisifyDoSomethine("hhh")
+     .then((res) => console.log("then:", res))
+     .catch((err) => console.log("catch:", err));
+   //then: hhh
+
+   myPromisifyDoSomethine("zzz")
+     .then((res) => console.log("then:", res))
+     .catch((err) => console.log("catch:", err));
+   //catch: error!!
+   ```
+
 1. 说一说宏任务微任务的处理方式
 1. 手写一个 Promise
 
@@ -611,3 +691,23 @@ new Promise((resolve, reject) => {
 > 补充题
 
 1. 如何中断一个 Promise
+
+```js
+function PromiseController(promise) {
+  let abort;
+  let wait = new Promise((resolve, reject) => (abort = reject));
+  let p = Promise.race([promise, wait]);
+  p.abort = abort;
+  return p;
+}
+
+const request = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("收到服务端数据");
+  }, 3000);
+});
+
+const req = PromiseController(request);
+req.then((res) => console.log("res:", res)).catch((e) => console.log("e:", e));
+setTimeout(() => req.abort("用户手动终止请求"), 2000); // 这里可以是用户主动点击
+```
