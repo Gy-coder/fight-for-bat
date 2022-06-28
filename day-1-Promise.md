@@ -3,7 +3,10 @@
 > Promise 相关问题
 
 1. 聊一聊 Promise 的原理
-1. 使用 Promise 封装 Ajax
+
+   Promise 是一个保存了异步事件未来执行结果的对象。它使用回调函数，为每一个异步任务创建一个 Promise 实例，通过.then 收集回调，并异步触发 resolve. Promise 用回调函数延迟绑定、回调函数 onResolve 返回值穿透机制解决回调嵌套层级过多的问题；使用错误冒泡机制简化了错误处理逻辑堆砌的问题。
+
+2. 使用 Promise 封装 Ajax
 
    ```js
    function ajax({ method, url, data }) {
@@ -32,7 +35,7 @@
    );
    ```
 
-1. Promise.all、Promise.allSettled、Promise.race、Promise.any、Promise.resolve、Promise.reject 分别有什么用？
+3. Promise.all、Promise.allSettled、Promise.race、Promise.any、Promise.resolve、Promise.reject 分别有什么用？
 
    - Promise.all
 
@@ -46,7 +49,19 @@
 
      Promise.race 接收一个数组，返回这个数组第一个被处理的 Promise 的结果
 
-1. 手写 Promise.all、Promise.race、Promise.allSettled、Promise.any、Promise.resolve、Promise.reject
+   * Promise.any
+
+     并行执行多个 promise，但只等待第一个 fulfilled 的 promise，并将这个 fulfilled 的 promise 返回。如果给出的 promise 都 rejected，那么则返回 rejected 的 promise 和 AggregateError 错误类型的 error 实例—— 一个特殊的 error 对象，在其 errors 属性中存储着所有 promise error。
+
+   * Promise.resolve
+
+     使用给定 value 创建一个 resolved 的 promise。
+
+   - Promise.reject
+
+     使用给定 error 创建一个 reject 的 promise。
+
+4. 手写 Promise.all、Promise.race、Promise.allSettled、Promise.any、Promise.resolve、Promise.reject
 
    - 手写 Promise.all
 
@@ -266,7 +281,7 @@
      console.log(Promise.reject2(3));
      ```
 
-1. 并发请求限制数量手写代码
+5. 并发请求限制数量手写代码
 
    ```js
    async function asyncPool(limit, array, fn) {
@@ -309,7 +324,7 @@
    })();
    ```
 
-1. 手写代码实现 Promisify
+6. 手写代码实现 Promisify
 
    ```js
    function promisify(fn) {
@@ -348,8 +363,8 @@
    //catch: error!!
    ```
 
-1. 说一说宏任务微任务的处理方式
-1. 手写一个 Promise
+7. 说一说宏任务微任务的处理方式
+8. 手写一个 Promise
 
    简单版(all test has been passed):
 
@@ -537,12 +552,14 @@ new Promise((resolve) => {
   console.log(3);
 });
 console.log(4);
+
+// 2 4 3 1
 ```
 
 1. 输出什么
 
-```javascriptt
-new Promise(function f1(resolve){
+```javascript
+new Promise(function f1(resolve) {
   console.log(1);
   setTimeout(function f2() {
     console.log(2);
@@ -550,13 +567,14 @@ new Promise(function f1(resolve){
   resolve(1);
 }).then(function f3(res) {
   console.log(3);
-})
+});
 
 setTimeout(function f4() {
   console.log(4);
-})
+});
 
 console.log(5);
+// 1 5 3 2 4
 ```
 
 3. 输出什么
@@ -583,6 +601,7 @@ new Promise(function f2(resolve) {
 });
 
 console.log(6);
+// 2
 ```
 
 4. 输出什么
