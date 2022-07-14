@@ -218,6 +218,7 @@
 
        - Referer 判断 : 根据 Referer 来判断请求来源。如果不在白名单，服务器忽略该请求。 该方法不可靠，Referer 伪造太容易了。
        - Semiste: Set-Cookie: sid=1; Samesite=Strict
+       -
 
 32. Websockt 是什么？和 HTTP 有什么区别？
 33. 服务端推送有哪些技术？
