@@ -86,3 +86,41 @@
       优势： 比babel快50倍
       能否用于webpack： 能
       缺点: 不能对 TS 代码进行类型检查 & 不能打包 CSS、SVG
+      
+      
+7. loader 和 plugin的区别
+  
+     1. loader是由于浏览器只能识别js代码，而无法识别诸如css等代码，因此需要对代码进行转译，他的核心功能是输入代码内容，然后输出转译后的代码内容
+     2. plugin是对webpack功能的拓展，通过调用tapable的钩子，在对应的时机执行自定义操作
+     
+8. 手写一个简单的markdown-loader
+
+    ```js
+    function markdown-loader(code){
+      const html = marked(code)
+      return `
+        const str = ${html}
+        export default str;
+      `
+    }
+    ```
+9. 手写一个简单的plugin
+
+   ```js
+   class FileListPlugin{
+    apply(complier){
+      complier.hooks.emit.tap("FileListPlugin",(compliation)=> {
+        const { assets } = compilation
+        let content = `## 文件名    大小 \r\n`
+        for (const [filename, stat] of Object.entries(assets)) {
+          content += `- ${filename}    ${stat.size()}\r\n`
+        }
+        assets[this.filename] = {
+          source() { return content },
+          size() { return content.length }
+        })
+     }
+   }
+   ```
+      
+      
